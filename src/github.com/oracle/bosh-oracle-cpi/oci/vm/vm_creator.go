@@ -16,8 +16,6 @@ type InstanceConfiguration struct {
 	ImageId string
 	Shape   string
 	Name    string
-	// Deprecated:
-	PrivateIP string
 	Network   Networks
 }
 
