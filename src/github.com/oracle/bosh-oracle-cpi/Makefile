@@ -34,7 +34,8 @@ clean:
 
 # Run gofmt on all code
 fmt:
-	gofmt -l -w .
+	@srcs=$$(find . -type f -name '*.go' -not -path "./vendor/*");\
+	gofmt -l -w $$srcs
 
 # Run linter with non-strict checking
 lint:

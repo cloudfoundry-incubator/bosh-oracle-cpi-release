@@ -2,54 +2,68 @@ package vm
 
 import (
 	"fmt"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	"github.com/oracle/bosh-oracle-cpi/oci/client"
 	"oracle/oci/core/client/virtual_network"
+)
 
-	"oracle/oci/core/models"
+const (
+	manualNetwork  = "manual"
+	vipNetwork     = "vip"
+	dynamicNetwork = "dynamic"
 )
 
 type NetworkConfiguration struct {
 	VcnName    string
 	SubnetName string
-	PrivateIP  string
-
-	// Queried/Cached id of Vcn
-	vcnId string
-	// Queried/Cached id of Subnet
-	subnetId string
+	IP         string
+	Type       string
 }
 
-func (n *NetworkConfiguration) subnetID(connector client.Connector) (string, error) {
+func (n NetworkConfiguration) newVnicConfigurator(connector client.Connector, logger boshlog.Logger) (VnicConfigurator, error) {
 
-	if n.subnetId != "" {
-		return n.subnetId, nil
+	vcnID, subnetID, err := n.networkIDs(connector)
+	if err != nil {
+		return nil, err
 	}
+
+	switch n.Type {
+	case manualNetwork:
+		return NewManualNetworkConfigurator(n, vcnID, subnetID), nil
+	case vipNetwork:
+		return NewVipNetworkConfigurator(connector, logger, n, vcnID, subnetID), nil
+		/*
+			case dynamicNetwork:
+				return nil, nil
+		*/
+	}
+	return nil, fmt.Errorf("Unsupported network type %s", n.Type)
+}
+
+func (n NetworkConfiguration) subnetID(connector client.Connector, vcnId string) (string, error) {
+
 	_, err := n.vcnID(connector)
 	if err != nil {
 		return "", err
 	}
 
 	p := virtual_network.NewListSubnetsParams()
-	p.WithCompartmentID(connector.CompartmentId()).WithVcnID(n.vcnId)
+	p.WithCompartmentID(connector.CompartmentId()).WithVcnID(vcnId)
 	response, err := connector.CoreSevice().VirtualNetwork.ListSubnets(p)
 	if err != nil {
 		return "", err
 	}
 	for _, s := range response.Payload {
 		if s.DisplayName == n.SubnetName {
-			n.subnetId = *s.ID
-			return n.subnetId, nil
+			return *s.ID, nil
 		}
 	}
 	return "", fmt.Errorf("Unable to find ID of subnet %s", n.SubnetName)
 }
 
 // VcnID queries the OCID of a vcn from the compute service
-func (n *NetworkConfiguration) vcnID(connector client.Connector) (string, error) {
+func (n NetworkConfiguration) vcnID(connector client.Connector) (string, error) {
 
-	if n.vcnId != "" {
-		return n.vcnId, nil
-	}
 	req := virtual_network.NewListVcnsParams()
 	req.WithCompartmentID(connector.CompartmentId())
 	res, err := connector.CoreSevice().VirtualNetwork.ListVcns(req)
@@ -59,27 +73,26 @@ func (n *NetworkConfiguration) vcnID(connector client.Connector) (string, error)
 
 	for _, v := range res.Payload {
 		if v.DisplayName == n.VcnName {
-			n.vcnId = *v.ID
-			return n.vcnId, nil
+			return *v.ID, nil
 		}
 	}
 	return "", fmt.Errorf("Error finding VcnID of VCN %s", n.VcnName)
 }
 
-func (n *NetworkConfiguration) newCreateVnicDetail(connector client.Connector, vnicName string) (models.CreateVnicDetails, error) {
+func (n NetworkConfiguration) networkIDs(connector client.Connector) (string, string, error) {
 
-	s, err := n.subnetID(connector)
+	vcnID, err := n.vcnID(connector)
+
 	if err != nil {
-		return models.CreateVnicDetails{}, err
+		return "", "", err
 	}
 
-	return models.CreateVnicDetails{
-		PrivateIP:   n.PrivateIP,
-		SubnetID:    &s,
-		DisplayName: vnicName}, nil
+	subnetID, err := n.subnetID(connector, vcnID)
+
+	return vcnID, subnetID, err
 }
 
-func (n *NetworkConfiguration) validate() error {
+func (n NetworkConfiguration) validate() error {
 
 	if n.VcnName == "" {
 		return fmt.Errorf(" Missing VCN name")
@@ -88,4 +101,22 @@ func (n *NetworkConfiguration) validate() error {
 		return fmt.Errorf("Missing subnet name")
 	}
 	return nil
+}
+
+// isDynamic returns true if the network is configured
+// as a "dynamic" network
+func (n NetworkConfiguration) isDynamic() bool {
+	return n.Type == dynamicNetwork
+}
+
+// isStatic returns true if the network is configured
+// as a "manual" network
+func (n NetworkConfiguration) isManual() bool {
+	return n.Type == manualNetwork
+}
+
+// isVip returns true if the network is configured
+// as a "vip" network
+func (n NetworkConfiguration) isVip() bool {
+	return n.Type == vipNetwork
 }

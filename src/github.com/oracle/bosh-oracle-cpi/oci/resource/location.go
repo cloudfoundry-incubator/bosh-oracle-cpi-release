@@ -1,13 +1,11 @@
 package resource
 
 import (
-	"fmt"
 	"github.com/oracle/bosh-oracle-cpi/oci/client"
 
-	"github.com/oracle/bosh-oracle-cpi/oci"
-	"oracle/oci/core/client/compute"
-	"oracle/oci/core/client/virtual_network"
+	"github.com/oracle/bosh-oracle-cpi/oci/network"
 	"oracle/oci/core/models"
+	"fmt"
 )
 
 type Location struct {
@@ -22,7 +20,7 @@ func NewLocation(ad string, compartmentId string) Location {
 func (loc Location) instanceIPs(connector client.Connector, instanceID string) (
 	publicip []string, privateip []string, err error) {
 
-	vnics, err := loc.Vnics(connector, instanceID)
+	vnics, err := loc.vnics(connector, instanceID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -35,39 +33,16 @@ func (loc Location) instanceIPs(connector client.Connector, instanceID string) (
 	return public, private, nil
 }
 
-func (loc Location) Vnics(connector client.Connector, instanceID string) ([]*models.Vnic, error) {
+func (loc Location) vnics(connector client.Connector, instanceID string) ([]*models.Vnic, error) {
 
-	// Find all VnicAttachments associated with the given instance
-	p := compute.NewListVnicAttachmentsParams()
-	p.WithInstanceID(&instanceID).WithCompartmentID(loc.compartmentId).WithAvailabilityDomain(&loc.availabilityDomain)
-	r, err := connector.CoreSevice().Compute.ListVnicAttachments(p)
+	vnics, err := network.FindVnicsAttachedToInstance(connector, instanceID, loc.compartmentId)
 	if err != nil {
-		return nil, fmt.Errorf("Error finding VnicAttachments for instance %s, %v",
-			instanceID, oci.CoreModelErrorMsg(err))
+		return nil, err
 	}
-
-	// Get the Vnic for each attachment
-	if len(r.Payload) == 0 {
-		return nil, fmt.Errorf("No Vnic Attachments found for VM %s", instanceID)
+	if len(vnics) == 0 {
+		err = fmt.Errorf("No Vnic Attachments found for VM %s", instanceID)
 	}
-
-	vnics := []*models.Vnic{}
-	for _, attachment := range r.Payload {
-
-		switch *attachment.LifecycleState {
-		case "ATTACHED":
-			req := virtual_network.NewGetVnicParams().WithVnicID(attachment.VnicID)
-			res, err := connector.CoreSevice().VirtualNetwork.GetVnic(req)
-			if err != nil {
-				return nil, fmt.Errorf("Error finding Vnic for attachment %s. Reason:%s",
-					*attachment.ID, oci.CoreModelErrorMsg(err))
-			}
-			vnics = append(vnics, res.Payload)
-
-		case "DETACHED", "DETACHING", "ATTACHING":
-		}
-	}
-	return vnics, nil
+	return vnics, err
 }
 
 func (loc Location) CompartmentID() string {

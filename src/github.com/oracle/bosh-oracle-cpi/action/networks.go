@@ -41,7 +41,8 @@ func (ns Networks) AsNetworkConfiguration() vm.Networks {
 		networks = append(networks, vm.NetworkConfiguration{
 			VcnName:    n.CloudProperties.VcnName,
 			SubnetName: n.CloudProperties.SubnetName,
-			PrivateIP:  n.IP})
+			IP:         n.IP,
+			Type:       n.Type})
 	}
 	return networks
 }

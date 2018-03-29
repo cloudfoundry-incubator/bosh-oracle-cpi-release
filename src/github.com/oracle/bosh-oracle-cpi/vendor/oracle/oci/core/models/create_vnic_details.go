@@ -42,7 +42,7 @@ type CreateVnicDetails struct {
 	//
 	// Example: `false`
 	//
-	AssignPublicIP bool `json:"assignPublicIp,omitempty"`
+	AssignPublicIP *bool `json:"assignPublicIp,omitempty"`
 
 	// A user-friendly name for the VNIC. Does not have to be unique.
 	// Avoid entering confidential information.

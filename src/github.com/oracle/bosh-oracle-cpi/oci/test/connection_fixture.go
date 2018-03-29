@@ -79,7 +79,7 @@ func (c *ConnectionFixture) DefaultInstanceConfiguration() vm.InstanceConfigurat
 	icfg := vmStandard12config
 	icfg.ImageId = c.StemcellImageID()
 	icfg.Network = []vm.NetworkConfiguration{
-		{VcnName: c.VCN(), SubnetName: c.Subnet(), PrivateIP: ""},
+		{VcnName: c.VCN(), SubnetName: c.Subnet(), IP: "", Type: "manual"},
 	}
 	return icfg
 }

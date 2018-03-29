@@ -23,7 +23,7 @@ type sshCmdRunner struct {
 
 const cmdArgTemplate = "-vvv -o StrictHostKeyChecking=no %v@%v -i %s %s"
 const remoteSSHPort = 22
-const sshConnectTimeout = 2*time.Second
+const sshConnectTimeout = 2 * time.Second
 
 type SSHCmdResultHandler func(stdout string, stderr string) (retry bool, reasonToRetry string)
 

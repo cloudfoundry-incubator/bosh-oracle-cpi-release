@@ -120,7 +120,7 @@ func Test_VmOpsRecreateVMWithSameIP(t *testing.T) {
 	defer deleteInstance()
 	icfg = state.DefaultInstanceConfiguration()
 	icfg.Name = "recreated-with-deleted-ip"
-	icfg.Network[0].PrivateIP = ip
+	icfg.Network[0].IP = ip
 	in, err = creator.CreateInstance(icfg, vm.InstanceMetadata{})
 
 	if err != nil {
@@ -156,7 +156,8 @@ func Test_VmOpsAttachMultipleVnics(t *testing.T) {
 	icfg := state.DefaultInstanceConfiguration()
 	icfg.Network = append(icfg.Network,
 		vm.NetworkConfiguration{VcnName: state.VCN(),
-			SubnetName: state.Subnet2()})
+			SubnetName: state.Subnet2(),
+			Type:       "manual"})
 	in, err = creator.CreateInstance(icfg, vm.InstanceMetadata{})
 
 	if err != nil {

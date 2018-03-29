@@ -14,8 +14,8 @@ func (n Networks) primary() NetworkConfiguration {
 func (n Networks) privateIPs() []string {
 	ips := []string{}
 	for _, ip := range n {
-		if ip.PrivateIP != "" {
-			ips = append(ips, ip.PrivateIP)
+		if ip.IP != "" {
+			ips = append(ips, ip.IP)
 		}
 	}
 	return ips

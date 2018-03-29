@@ -16,7 +16,7 @@ type InstanceConfiguration struct {
 	ImageId string
 	Shape   string
 	Name    string
-	Network   Networks
+	Network Networks
 }
 
 type Creator interface {
@@ -33,7 +33,7 @@ type creator struct {
 
 func NewCreator(c client.Connector, l boshlog.Logger, availabilityDomain string) Creator {
 	return &creator{connector: c, logger: l,
-		location: resource.NewLocation(availabilityDomain, c.CompartmentId()),
+		location:              resource.NewLocation(availabilityDomain, c.CompartmentId()),
 	}
 }
 
@@ -47,12 +47,17 @@ func (cv *creator) CreateInstance(icfg InstanceConfiguration,
 }
 func (cv *creator) launchInstance(icfg InstanceConfiguration, md InstanceMetadata) (*resource.Instance, error) {
 
-	primary := icfg.Network.primary()
-	primaryVnic, err := primary.newCreateVnicDetail(cv.connector, "primary")
+	// Arrange for primary VNIC
+	configurator, err := icfg.Network.primary().newVnicConfigurator(cv.connector, cv.logger)
+	if err != nil {
+		return nil, newLaunchInstanceError(err)
+	}
+	primaryVnic, err := configurator.CreatePrimaryVnicDetail("primary")
 	if err != nil {
 		return nil, newLaunchInstanceError(err)
 	}
 
+	// Create Instance
 	req := cv.buildLaunchInstanceParams(icfg, md, &primaryVnic)
 	cv.logLaunchingInstanceDebugMsg(req)
 	res, err := cv.connector.CoreSevice().Compute.LaunchInstance(req)
@@ -61,8 +66,14 @@ func (cv *creator) launchInstance(icfg InstanceConfiguration, md InstanceMetadat
 	}
 	instance := resource.NewInstance(*res.Payload.ID, cv.location)
 
+	// Complete primary VNIC configuration
+	if err := configurator.ConfigurePrimaryVnic(instance); err != nil {
+		return nil, newLaunchInstanceError(err)
+	}
+
+	// Additional VNICs
 	if icfg.Network.hasSecondaries() {
-		err = cv.attachSecondaryVnics(instance, icfg.Network.secondaries())
+		err := cv.attachSecondaryVnics(instance, icfg.Network.secondaries())
 		if err != nil {
 			return nil, newLaunchInstanceError(err)
 		}
@@ -102,14 +113,15 @@ func (cv *creator) logLaunchingInstanceDebugMsg(p *compute.LaunchInstanceParams)
 
 	fmtStr := "LaunchInstance: AD:%s, Name:%s, Shape:%s\nCompartmentId:%s\nImageId=%s\n"
 	args := []interface{}{*p.LaunchInstanceDetails.AvailabilityDomain,
-		p.LaunchInstanceDetails.DisplayName,
-		*p.LaunchInstanceDetails.Shape,
-		*p.LaunchInstanceDetails.CompartmentID,
-		p.LaunchInstanceDetails.ImageID,
+						  p.LaunchInstanceDetails.DisplayName,
+						  *p.LaunchInstanceDetails.Shape,
+						  *p.LaunchInstanceDetails.CompartmentID,
+						  p.LaunchInstanceDetails.ImageID,
 	}
 	if p.LaunchInstanceDetails.CreateVnicDetails != nil {
-		fmtStr += "Subnet:%s, IP:%s\n"
+		fmtStr += "Subnet:%s, AssignPublicIP:%v PrivateIP:%s \n"
 		args = append(args, *p.LaunchInstanceDetails.CreateVnicDetails.SubnetID,
+			p.LaunchInstanceDetails.CreateVnicDetails.AssignPublicIP,
 			p.LaunchInstanceDetails.CreateVnicDetails.PrivateIP)
 
 	}
@@ -130,10 +142,11 @@ func (cv *creator) attachSecondaryVnics(in *resource.Instance, secondaries []Net
 	defer deleteInstance()
 
 	for i, secondary := range secondaries {
-		vnicDetail, err := secondary.newCreateVnicDetail(cv.connector, fmt.Sprintf("secondary-%d", i))
+		c, err := secondary.newVnicConfigurator(cv.connector, cv.logger)
 		if err != nil {
 			return err
 		}
+		vnicDetail, _ := c.CreateSecondaryVnicDetail(fmt.Sprintf("secondary-%d", i))
 		attachmentError = cv.attachVnic(in, vnicDetail)
 		if attachmentError != nil {
 			return attachmentError
@@ -159,7 +172,7 @@ func (cv *creator) attachVnic(in *resource.Instance, details models.CreateVnicDe
 	}
 
 	waiter := vnicAttachmentWaiter{logger: cv.logger,
-		connector: cv.connector,
+		connector:                         cv.connector,
 		attachedHandler: func(attachmentID string, vnicID string) {
 			cv.logger.Debug(logTag, "Attached Vnic to Instance %s. VnicID=%s", in.ID(), vnicID)
 		},
