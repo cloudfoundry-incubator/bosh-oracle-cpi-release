@@ -119,11 +119,14 @@ func (cv *creator) logLaunchingInstanceDebugMsg(p *compute.LaunchInstanceParams)
 		p.LaunchInstanceDetails.ImageID,
 	}
 	if p.LaunchInstanceDetails.CreateVnicDetails != nil {
-		fmtStr += "Subnet:%s, AssignPublicIP:%v PrivateIP:%s \n"
+		fmtStr += "Subnet:%s, PrivateIP:%s\n"
 		args = append(args, *p.LaunchInstanceDetails.CreateVnicDetails.SubnetID,
-			*p.LaunchInstanceDetails.CreateVnicDetails.AssignPublicIP,
 			p.LaunchInstanceDetails.CreateVnicDetails.PrivateIP)
 
+		if p.LaunchInstanceDetails.CreateVnicDetails.AssignPublicIP != nil {
+			fmtStr += "AssignPublicIP:%v\n"
+			args = append(args, *p.LaunchInstanceDetails.CreateVnicDetails.AssignPublicIP)
+		}
 	}
 	fmtStr += "Metadata:\n\t%v\n"
 	args = append(args, p.LaunchInstanceDetails.Metadata)
