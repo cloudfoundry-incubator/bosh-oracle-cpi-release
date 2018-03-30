@@ -51,13 +51,16 @@ func publicKeyFileContent(path string) string {
 	return string(key)
 }
 
-func absolutePath(iniPath string, relativePath string) string {
+func absolutePath(iniPath string, path string) string {
 
-	if strings.Contains(relativePath, "~") {
-		return strings.Replace(relativePath, "~", os.Getenv("HOME"), -1)
+	if filepath.IsAbs(path) {
+		return path
+	}
+	if strings.Contains(path, "~") {
+		return strings.Replace(path, "~", os.Getenv("HOME"), -1)
 	}
 	basePath := filepath.Dir(iniPath)
-	return filepath.Join(basePath, relativePath)
+	return filepath.Join(basePath, path)
 }
 
 func assetsDir() string {
