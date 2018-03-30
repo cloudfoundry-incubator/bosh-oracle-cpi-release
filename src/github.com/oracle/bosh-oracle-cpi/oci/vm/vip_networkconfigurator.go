@@ -59,14 +59,15 @@ func (vc vipNetworkConfigurator) ConfigurePrimaryVnic(in *resource.Instance) err
 	}
 
 	// Associate public IP -> private IP
-	d := models.UpdatePublicIPDetails{DisplayName: "vnc-primary", PrivateIPID: &privateIP.ID}
+	d := models.UpdatePublicIPDetails{PrivateIPID: &privateIP.ID}
 	p := virtual_network.NewUpdatePublicIPParams().WithPublicIPID(publicIP.ID).WithUpdatePublicIPDetails(&d)
 	res, err := vc.connector.CoreSevice().VirtualNetwork.UpdatePublicIP(p)
-
-	if err == nil {
-		vc.logger.Debug(logTag, "Assigned public IP %+v", *res.Payload)
+	if err != nil {
+		return err
 	}
-	return err
+	waiter := network.NewPublicIPWaiter(vc.connector, vc.logger)
+	return waiter.WaitUntilAssigned(res.Payload)
+
 }
 
 func (vc vipNetworkConfigurator) configuredPublicIP() (*models.PublicIP, error) {

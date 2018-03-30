@@ -8,7 +8,7 @@ import (
 
 func Test_VMAssignFloatingIP(t *testing.T) {
 
-	state := NewConnectionFixture()
+	state := NewPublicIPFixture()
 	state.Setup(t)
 	defer state.TearDown(t)
 
@@ -17,7 +17,7 @@ func Test_VMAssignFloatingIP(t *testing.T) {
 	var err error
 
 	creator := vm.NewCreator(state.Connector(),
-		state.Logger(), state.AD())
+		state.Logger(), state.ConnectionFixture().AD())
 	terminator := vm.NewTerminator(state.Connector(), state.Logger())
 
 	deleteInstance := func() {
@@ -29,9 +29,11 @@ func Test_VMAssignFloatingIP(t *testing.T) {
 	defer deleteInstance()
 
 	// Create a VM
-	icfg := state.DefaultInstanceConfiguration()
-	icfg.Network = []vm.NetworkConfiguration{
-		{VcnName: state.VCN(), SubnetName: state.Subnet(), IP: "129.146.151.194", Type: "vip"},
+	icfg := state.ConnectionFixture().DefaultInstanceConfiguration()
+	icfg.Network = []vm.NetworkConfiguration{{VcnName: state.ConnectionFixture().VCN(),
+		SubnetName:                                    state.ConnectionFixture().Subnet(),
+		IP:                                            state.Address(),
+		Type:                                          "vip"},
 	}
 
 	icfg.Name = "test-instance-with-floating-ip"
@@ -44,7 +46,5 @@ func Test_VMAssignFloatingIP(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error getting assigned public IP. Err: %v", err)
 	}
-
-	assertEqual(t, assignedPublicIP, "129.146.151.194", "")
-
+	assertEqual(t, state.Address(), assignedPublicIP, "")
 }

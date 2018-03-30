@@ -9,6 +9,8 @@ import (
 	"oracle/oci/core/models"
 )
 
+const networkLogTag = "OCINetwork"
+
 func FindVnicsAttachedToInstance(connector client.Connector, instanceID string, compartmentId string) ([]*models.Vnic, error) {
 
 	// Find all VnicAttachments associated with the given instance
@@ -19,7 +21,6 @@ func FindVnicsAttachedToInstance(connector client.Connector, instanceID string, 
 		return nil, fmt.Errorf("Error finding VnicAttachments for instance %s, %v",
 			instanceID, oci.CoreModelErrorMsg(err))
 	}
-
 
 	vnics := []*models.Vnic{}
 	for _, attachment := range r.Payload {

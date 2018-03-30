@@ -121,7 +121,7 @@ func (cv *creator) logLaunchingInstanceDebugMsg(p *compute.LaunchInstanceParams)
 	if p.LaunchInstanceDetails.CreateVnicDetails != nil {
 		fmtStr += "Subnet:%s, AssignPublicIP:%v PrivateIP:%s \n"
 		args = append(args, *p.LaunchInstanceDetails.CreateVnicDetails.SubnetID,
-			p.LaunchInstanceDetails.CreateVnicDetails.AssignPublicIP,
+			*p.LaunchInstanceDetails.CreateVnicDetails.AssignPublicIP,
 			p.LaunchInstanceDetails.CreateVnicDetails.PrivateIP)
 
 	}
