@@ -3,9 +3,9 @@ package resource
 import (
 	"github.com/oracle/bosh-oracle-cpi/oci/client"
 
+	"fmt"
 	"github.com/oracle/bosh-oracle-cpi/oci/network"
 	"oracle/oci/core/models"
-	"fmt"
 )
 
 type Location struct {

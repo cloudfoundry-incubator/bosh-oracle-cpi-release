@@ -31,9 +31,9 @@ func Test_VMAssignFloatingIP(t *testing.T) {
 	// Create a VM
 	icfg := state.ConnectionFixture().DefaultInstanceConfiguration()
 	icfg.Network = []vm.NetworkConfiguration{{VcnName: state.ConnectionFixture().VCN(),
-		SubnetName:                                    state.ConnectionFixture().Subnet(),
-		IP:                                            state.Address(),
-		Type:                                          "vip"},
+		SubnetName: state.ConnectionFixture().Subnet(),
+		IP:         state.Address(),
+		Type:       "vip"},
 	}
 
 	icfg.Name = "test-instance-with-floating-ip"

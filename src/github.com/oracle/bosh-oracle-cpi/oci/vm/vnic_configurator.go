@@ -1,8 +1,8 @@
 package vm
 
 import (
-	"oracle/oci/core/models"
 	"github.com/oracle/bosh-oracle-cpi/oci/resource"
+	"oracle/oci/core/models"
 )
 
 type VnicConfigurator interface {

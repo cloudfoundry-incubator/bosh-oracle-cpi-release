@@ -50,7 +50,7 @@ func (p *PublicIPFixture) TearDown(t *testing.T) error {
 	_, err := vn.DeletePublicIP(params)
 
 	if err != nil {
-		t.Logf(" Ignoring error while deleting IP %s", p.publicIP.ID, err)
+		t.Logf(" Ignoring error while deleting IP %s.", p.publicIP.ID)
 	}
 	return p.connectionFixture.TearDown(t)
 }

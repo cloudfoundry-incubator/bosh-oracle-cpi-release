@@ -33,7 +33,7 @@ type creator struct {
 
 func NewCreator(c client.Connector, l boshlog.Logger, availabilityDomain string) Creator {
 	return &creator{connector: c, logger: l,
-		location:              resource.NewLocation(availabilityDomain, c.CompartmentId()),
+		location: resource.NewLocation(availabilityDomain, c.CompartmentId()),
 	}
 }
 
@@ -113,10 +113,10 @@ func (cv *creator) logLaunchingInstanceDebugMsg(p *compute.LaunchInstanceParams)
 
 	fmtStr := "LaunchInstance: AD:%s, Name:%s, Shape:%s\nCompartmentId:%s\nImageId=%s\n"
 	args := []interface{}{*p.LaunchInstanceDetails.AvailabilityDomain,
-						  p.LaunchInstanceDetails.DisplayName,
-						  *p.LaunchInstanceDetails.Shape,
-						  *p.LaunchInstanceDetails.CompartmentID,
-						  p.LaunchInstanceDetails.ImageID,
+		p.LaunchInstanceDetails.DisplayName,
+		*p.LaunchInstanceDetails.Shape,
+		*p.LaunchInstanceDetails.CompartmentID,
+		p.LaunchInstanceDetails.ImageID,
 	}
 	if p.LaunchInstanceDetails.CreateVnicDetails != nil {
 		fmtStr += "Subnet:%s, AssignPublicIP:%v PrivateIP:%s \n"
@@ -172,7 +172,7 @@ func (cv *creator) attachVnic(in *resource.Instance, details models.CreateVnicDe
 	}
 
 	waiter := vnicAttachmentWaiter{logger: cv.logger,
-		connector:                         cv.connector,
+		connector: cv.connector,
 		attachedHandler: func(attachmentID string, vnicID string) {
 			cv.logger.Debug(logTag, "Attached Vnic to Instance %s. VnicID=%s", in.ID(), vnicID)
 		},
