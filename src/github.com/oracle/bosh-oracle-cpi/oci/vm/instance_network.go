@@ -27,15 +27,11 @@ func (n NetworkConfiguration) newVnicConfigurator(connector client.Connector, lo
 		return nil, err
 	}
 
-	switch n.Type {
-	case manualNetwork:
-		return NewManualNetworkConfigurator(n, vcnID, subnetID), nil
-	case vipNetwork:
-		return NewVipNetworkConfigurator(connector, logger, n, vcnID, subnetID), nil
-		/*
-			case dynamicNetwork:
-				return nil, nil
-		*/
+	switch {
+	case n.isManual(), n.isDynamic():
+		return NewPrivateIPConfigurator(n, vcnID, subnetID), nil
+	case n.isVip():
+		return NewPublicIPConfigurator(connector, logger, n, vcnID, subnetID), nil
 	}
 	return nil, fmt.Errorf("Unsupported network type %s", n.Type)
 }
@@ -112,7 +108,7 @@ func (n NetworkConfiguration) isDynamic() bool {
 // isStatic returns true if the network is configured
 // as a "manual" network
 func (n NetworkConfiguration) isManual() bool {
-	return n.Type == manualNetwork
+	return n.Type == "" || n.Type == manualNetwork
 }
 
 // isVip returns true if the network is configured

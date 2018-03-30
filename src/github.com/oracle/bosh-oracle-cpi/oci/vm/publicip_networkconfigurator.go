@@ -11,7 +11,7 @@ import (
 	"oracle/oci/core/models"
 )
 
-type vipNetworkConfigurator struct {
+type publicIPConfigurator struct {
 	connector client.Connector
 	logger    boshlog.Logger
 
@@ -20,11 +20,11 @@ type vipNetworkConfigurator struct {
 	subnetId      string
 }
 
-func NewVipNetworkConfigurator(c client.Connector, l boshlog.Logger, n NetworkConfiguration, vcnId string, subnetId string) VnicConfigurator {
-	return &vipNetworkConfigurator{connector: c, logger: l, configuration: n, vcnId: vcnId, subnetId: subnetId}
+func NewPublicIPConfigurator(c client.Connector, l boshlog.Logger, n NetworkConfiguration, vcnId string, subnetId string) VnicConfigurator {
+	return &publicIPConfigurator{connector: c, logger: l, configuration: n, vcnId: vcnId, subnetId: subnetId}
 }
 
-func (vc vipNetworkConfigurator) CreatePrimaryVnicDetail(vnicName string) (models.CreateVnicDetails, error) {
+func (vc publicIPConfigurator) CreatePrimaryVnicDetail(vnicName string) (models.CreateVnicDetails, error) {
 
 	FALSE := false
 	return models.CreateVnicDetails{
@@ -33,7 +33,7 @@ func (vc vipNetworkConfigurator) CreatePrimaryVnicDetail(vnicName string) (model
 		DisplayName:    vnicName}, nil
 }
 
-func (vc vipNetworkConfigurator) CreateSecondaryVnicDetail(vnicName string) (models.CreateVnicDetails, error) {
+func (vc publicIPConfigurator) CreateSecondaryVnicDetail(vnicName string) (models.CreateVnicDetails, error) {
 
 	FALSE := false
 	return models.CreateVnicDetails{
@@ -42,7 +42,7 @@ func (vc vipNetworkConfigurator) CreateSecondaryVnicDetail(vnicName string) (mod
 		DisplayName:    vnicName}, nil
 }
 
-func (vc vipNetworkConfigurator) ConfigurePrimaryVnic(in *resource.Instance) error {
+func (vc publicIPConfigurator) ConfigurePrimaryVnic(in *resource.Instance) error {
 
 	vc.logger.Debug(logTag, "Configuring primary vnic for instance %v", in.ID())
 
@@ -70,7 +70,7 @@ func (vc vipNetworkConfigurator) ConfigurePrimaryVnic(in *resource.Instance) err
 
 }
 
-func (vc vipNetworkConfigurator) configuredPublicIP() (*models.PublicIP, error) {
+func (vc publicIPConfigurator) configuredPublicIP() (*models.PublicIP, error) {
 
 	details := models.GetPublicIPByIPAddressDetails{IPAddress: &vc.configuration.IP}
 	p := virtual_network.NewGetPublicIPByIPAddressParams().WithGetPublicIPByIPAddressDetails(&details)
@@ -86,7 +86,7 @@ func (vc vipNetworkConfigurator) configuredPublicIP() (*models.PublicIP, error) 
 	return publicIP, nil
 }
 
-func (vc vipNetworkConfigurator) primaryPrivateIpForInstance(instanceID string) (*models.PrivateIP, error) {
+func (vc publicIPConfigurator) primaryPrivateIpForInstance(instanceID string) (*models.PrivateIP, error) {
 	vnic, err := vc.primaryVnic(instanceID)
 	if err != nil {
 		return nil, err
@@ -94,7 +94,7 @@ func (vc vipNetworkConfigurator) primaryPrivateIpForInstance(instanceID string) 
 	return vc.primaryPrivateIP(*vnic.ID)
 }
 
-func (vc vipNetworkConfigurator) primaryVnic(instanceID string) (*models.Vnic, error) {
+func (vc publicIPConfigurator) primaryVnic(instanceID string) (*models.Vnic, error) {
 
 	vnics, err := network.FindVnicsAttachedToInstance(vc.connector, instanceID, vc.connector.CompartmentId())
 	if err != nil {
@@ -109,7 +109,7 @@ func (vc vipNetworkConfigurator) primaryVnic(instanceID string) (*models.Vnic, e
 	return nil, fmt.Errorf("Unable to find primary vnic for instance %v", instanceID)
 }
 
-func (vc vipNetworkConfigurator) primaryPrivateIP(vnicID string) (*models.PrivateIP, error) {
+func (vc publicIPConfigurator) primaryPrivateIP(vnicID string) (*models.PrivateIP, error) {
 
 	p := virtual_network.NewListPrivateIpsParams().WithVnicID(&vnicID)
 	res, err := vc.connector.CoreSevice().VirtualNetwork.ListPrivateIps(p)
