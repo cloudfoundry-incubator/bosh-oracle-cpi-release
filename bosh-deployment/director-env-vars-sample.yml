@@ -20,6 +20,11 @@ internal_gw: 10.0.1.1
 # Private IP that will be assigned to the BOSH director VM
 # Must fall within the subnet CIDR range above and must be available
 internal_ip: 10.0.1.XX
+
+# Preallocated floating IP
+# if using the vip network type
+external_ip: 129.XX.XX.XX
+
 #Fingerprint and contents of the API signing key associated with the User
 fingerprint:
 apikey: |

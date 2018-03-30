@@ -1,0 +1,47 @@
+# WARNING: We do not recommend to expose Director and any other services over public addresses.
+#
+# Variant of bosh-deployment/external-ip-with-registry-not-recommend.yml that: 
+# 1. Adds a network, named public, of type vip under /networks 
+# 2. Modifies the bosh instance-group to use the "public" network instead of the "default" network
+
+- type: replace
+  path: /networks/-
+  value:
+    name: public
+    type: vip
+
+- type: replace
+  path: /networks/name=public/cloud_properties?
+  value:
+    vcn: ((vcn))
+    subnet_name: ((subnet))
+
+- type: remove
+  path: /instance_groups/name=bosh/networks/0
+
+- type: replace
+  path: /instance_groups/name=bosh/networks/-
+  value:
+    name: public
+    static_ips: [((external_ip))]
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/director/default_ssh_options?/gateway_host
+  value: ((external_ip))
+
+# todo should not access non-defined vars
+- type: replace
+  path: /cloud_provider/mbus
+  value: https://mbus:((mbus_bootstrap_password))@((external_ip)):6868
+
+- type: replace
+  path: /cloud_provider/ssh_tunnel/host
+  value: ((external_ip))
+
+- type: replace
+  path: /variables/name=mbus_bootstrap_ssl/options/alternative_names/-
+  value: ((external_ip))
+
+- type: replace
+  path: /variables/name=director_ssl/options/alternative_names/-
+  value: ((external_ip))

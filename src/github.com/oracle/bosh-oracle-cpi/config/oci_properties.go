@@ -38,7 +38,7 @@ type OCIProperties struct {
 
 	// UsePublicIPForSSH controls whether to use public or private IP
 	// of the target insatnce for establishing SSH connections
-	UsePublicIPForSSH bool `json:"usePublicIpForSsh,omitempty"`
+	UsePublicIPForSSH bool `json:"usePublicIPForSSH,omitempty"`
 
 	// AuthorizedKeys contains the public ssh-keys to provision
 	// on new vms
@@ -122,7 +122,7 @@ func newSanitizedConfig(configFullPath string, b OCIProperties) OCIProperties {
 func (b OCIProperties) TransportConfig(host string) transport.Config {
 
 	return transport.Config{Tenant: b.Tenancy, User: b.User,
-		Fingerprint: b.Fingerprint, Host: host, KeyFile: b.APIKeyFile}
+		Fingerprint:                b.Fingerprint, Host: host, KeyFile: b.APIKeyFile}
 }
 
 // UserSSHPublicKeyContent returns the configured ssh-rsa user public key

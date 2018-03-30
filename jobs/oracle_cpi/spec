@@ -43,6 +43,9 @@ properties:
     description: Fingerprint of the api signing key
   oci.cpikey:
     description: Private CPI SSH Key
+  oci.usePublicIPForSSH:
+    description: Use the public or private IP of a VM when establishing a ssh session
+    default: false
 
 
   blobstore.provider:
