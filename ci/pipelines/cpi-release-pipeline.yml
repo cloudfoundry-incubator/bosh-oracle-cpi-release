@@ -105,6 +105,7 @@ jobs:
       - aggregate:
         - {trigger: true, passed: [run-unittests, run-ocitests], get: cpi-release-src, resource: bosh-cpi-release-src}
         - {trigger: false, get: dev-version-semver,   params: {bump: patch}}
+        - {trigger: true,  get: stemcell, resource: oracle-ubuntu-stemcell}
 
       - put: dev-version-semver
         params: {file: dev-version-semver/version}
@@ -121,7 +122,7 @@ jobs:
     plan:
       - aggregate:
         - {trigger: true, passed: [build-candidate], get: cpi-release-src, resource: bosh-cpi-release-src}
-        - {trigger: true,                            get: stemcell, resource: oracle-ubuntu-stemcell}
+        - {trigger: true, passed: [build-candidate], get: stemcell, resource: oracle-ubuntu-stemcell}
         - {trigger: true,                            get: fixture-ssh-keys, resource: fixture-env, params: {file: oci-config.tgz, unpack: true}}
         - {trigger: false,                           get: dev-version-semver}
         - {trigger: false,                           get: bats}
@@ -156,6 +157,7 @@ jobs:
          - {trigger: false, get: dev-version-semver}
          - {trigger: false, get: final-version-semver,   params: {bump: major}}
          - {trigger: true, passed: [run-bats], get: cpi-release-src, resource: bosh-cpi-release-src}
+         - {trigger: true, passed: [run-bats], get: stemcell, resource: oracle-ubuntu-stemcell}
 
       - task: download-cpi
         file: cpi-release-src/ci/tasks/download-cpi.yml
