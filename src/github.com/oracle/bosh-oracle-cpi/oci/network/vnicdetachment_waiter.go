@@ -1,4 +1,4 @@
-package vm
+package network
 
 import (
 	"errors"
@@ -10,11 +10,21 @@ import (
 	"time"
 )
 
+type DetachedStateHandler func(attachmentID string, vnicID string)
+
+type VnicDetachmentWaiter interface {
+	WaitFor(attachmentID string) error
+}
+
+func NewVnicDetachmentWaiter(c client.Connector, l boshlog.Logger, h DetachedStateHandler) VnicDetachmentWaiter {
+	return &vnicDetachmentWaiter{connector: c, logger: l, detachedHandler: h}
+}
+
 type vnicDetachmentWaiter struct {
 	connector client.Connector
 	logger    boshlog.Logger
 
-	detachedHandler func(attachmentID string, vnicID string)
+	detachedHandler DetachedStateHandler
 }
 
 func (w *vnicDetachmentWaiter) WaitFor(attachmentID string) (err error) {
@@ -41,13 +51,13 @@ func (w *vnicDetachmentWaiter) WaitFor(attachmentID string) (err error) {
 	}
 
 	retryable := boshretry.NewRetryable(getAttachmentState)
-	retryStrategy := boshretry.NewUnlimitedRetryStrategy(1*time.Second, retryable, w.logger)
+	retryStrategy := boshretry.NewAttemptRetryStrategy(100, 1*time.Second, retryable, w.logger)
 
-	w.logger.Debug(logTag, "Waiting for VNIC attachment %s to be detached...", attachmentID)
+	w.logger.Debug(networkLogTag, "Waiting for VNIC attachment %s to be detached...", attachmentID)
 	if err := retryStrategy.Try(); err != nil {
-		w.logger.Debug(logTag, "Error waiting to reach desired state %v. Giving up.", err)
+		w.logger.Debug(networkLogTag, "Error waiting to reach desired state %v. Giving up.", err)
 		return err
 	}
-	w.logger.Debug(logTag, "Detached VNIC attachment %s", attachmentID)
+	w.logger.Debug(networkLogTag, "Detached VNIC attachment %s", attachmentID)
 	return nil
 }

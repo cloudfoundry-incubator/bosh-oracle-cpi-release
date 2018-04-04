@@ -4,6 +4,7 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	"github.com/oracle/bosh-oracle-cpi/oci"
 	"github.com/oracle/bosh-oracle-cpi/oci/client"
+	"github.com/oracle/bosh-oracle-cpi/oci/network"
 	"oracle/oci/core/client/compute"
 )
 
@@ -75,9 +76,6 @@ func (t *terminator) detachAllVnics(attachmentIDs []string) {
 
 func (t *terminator) detachVnic(attachmentID string) error {
 
-	waiter := vnicDetachmentWaiter{logger: t.logger,
-		connector:       t.connector,
-		detachedHandler: nil,
-	}
+	waiter := network.NewVnicDetachmentWaiter(t.connector, t.logger, nil)
 	return waiter.WaitFor(attachmentID)
 }

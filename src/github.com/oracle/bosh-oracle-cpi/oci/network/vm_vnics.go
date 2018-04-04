@@ -26,7 +26,7 @@ func FindVnicsAttachedToInstance(connector client.Connector, instanceID string, 
 	for _, attachment := range r.Payload {
 
 		switch *attachment.LifecycleState {
-		case "ATTACHED":
+		case models.VnicAttachmentLifecycleStateATTACHED:
 			req := virtual_network.NewGetVnicParams().WithVnicID(attachment.VnicID)
 			res, err := connector.CoreSevice().VirtualNetwork.GetVnic(req)
 			if err != nil {
@@ -35,7 +35,8 @@ func FindVnicsAttachedToInstance(connector client.Connector, instanceID string, 
 			}
 			vnics = append(vnics, res.Payload)
 
-		case "DETACHED", "DETACHING", "ATTACHING":
+		case models.VnicAttachmentLifecycleStateATTACHING:
+		case models.VnicAttachmentLifecycleStateDETACHED, models.VnicAttachmentLifecycleStateDETACHING:
 		}
 	}
 	return vnics, nil

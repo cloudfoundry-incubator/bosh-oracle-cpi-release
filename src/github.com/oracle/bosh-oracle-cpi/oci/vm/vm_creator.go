@@ -5,6 +5,7 @@ import (
 	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	"github.com/oracle/bosh-oracle-cpi/oci"
 	"github.com/oracle/bosh-oracle-cpi/oci/client"
+	"github.com/oracle/bosh-oracle-cpi/oci/network"
 	"github.com/oracle/bosh-oracle-cpi/oci/resource"
 	"oracle/oci/core/client/compute"
 	"oracle/oci/core/models"
@@ -174,11 +175,9 @@ func (cv *creator) attachVnic(in *resource.Instance, details models.CreateVnicDe
 		return err
 	}
 
-	waiter := vnicAttachmentWaiter{logger: cv.logger,
-		connector: cv.connector,
-		attachedHandler: func(attachmentID string, vnicID string) {
+	waiter := network.NewVnicAttachmentWaiter(cv.connector, cv.logger,
+		func(attachmentID string, vnicID string) {
 			cv.logger.Debug(logTag, "Attached Vnic to Instance %s. VnicID=%s", in.ID(), vnicID)
-		},
-	}
+		})
 	return waiter.WaitFor(*res.Payload.ID)
 }
