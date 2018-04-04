@@ -2,6 +2,7 @@ package network
 
 import (
 	"fmt"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	"github.com/oracle/bosh-oracle-cpi/oci"
 	"github.com/oracle/bosh-oracle-cpi/oci/client"
 	"oracle/oci/core/client/compute"
@@ -11,7 +12,7 @@ import (
 
 const networkLogTag = "OCINetwork"
 
-func FindVnicsAttachedToInstance(connector client.Connector, instanceID string, compartmentId string) ([]*models.Vnic, error) {
+func FindVnicsAttachedToInstance(connector client.Connector, logger boshlog.Logger, instanceID string, compartmentId string) ([]*models.Vnic, error) {
 
 	// Find all VnicAttachments associated with the given instance
 	p := compute.NewListVnicAttachmentsParams()
@@ -23,20 +24,20 @@ func FindVnicsAttachedToInstance(connector client.Connector, instanceID string, 
 	}
 
 	vnics := []*models.Vnic{}
-	for _, attachment := range r.Payload {
-
-		switch *attachment.LifecycleState {
-		case models.VnicAttachmentLifecycleStateATTACHED:
-			req := virtual_network.NewGetVnicParams().WithVnicID(attachment.VnicID)
-			res, err := connector.CoreSevice().VirtualNetwork.GetVnic(req)
-			if err != nil {
-				return nil, fmt.Errorf("Error finding Vnic for attachment %s. Reason:%s",
-					*attachment.ID, oci.CoreModelErrorMsg(err))
-			}
+	attachmentHandler := func(attachmentID string, vnicID string) {
+		req := virtual_network.NewGetVnicParams().WithVnicID(vnicID)
+		res, err := connector.CoreSevice().VirtualNetwork.GetVnic(req)
+		if err != nil {
+			logger.Info(networkLogTag, " Encountered error %v while finding vnic %s for attachment %s. Skipping", err, attachmentID, vnicID)
+		} else {
 			vnics = append(vnics, res.Payload)
+		}
+	}
 
-		case models.VnicAttachmentLifecycleStateATTACHING:
-		case models.VnicAttachmentLifecycleStateDETACHED, models.VnicAttachmentLifecycleStateDETACHING:
+	for _, attachment := range r.Payload {
+		waiter := NewVnicAttachmentWaiter(connector, logger, attachmentHandler)
+		if err := waiter.WaitFor(*attachment.ID); err != nil {
+			logger.Info(networkLogTag, " Encountered error %v while waiting for vnic attachment %s to complete. Skipping", err, *attachment.ID)
 		}
 	}
 	return vnics, nil

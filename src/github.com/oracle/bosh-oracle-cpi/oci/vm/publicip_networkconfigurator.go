@@ -96,7 +96,7 @@ func (vc publicIPConfigurator) primaryPrivateIpForInstance(instanceID string) (*
 
 func (vc publicIPConfigurator) primaryVnic(instanceID string) (*models.Vnic, error) {
 
-	vnics, err := network.FindVnicsAttachedToInstance(vc.connector, instanceID, vc.connector.CompartmentId())
+	vnics, err := network.FindVnicsAttachedToInstance(vc.connector, vc.logger, instanceID, vc.connector.CompartmentId())
 	if err != nil {
 		return nil, err
 	}

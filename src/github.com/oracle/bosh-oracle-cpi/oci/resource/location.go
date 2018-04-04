@@ -4,6 +4,7 @@ import (
 	"github.com/oracle/bosh-oracle-cpi/oci/client"
 
 	"fmt"
+	boshlog "github.com/cloudfoundry/bosh-utils/logger"
 	"github.com/oracle/bosh-oracle-cpi/oci/network"
 	"oracle/oci/core/models"
 )
@@ -17,10 +18,10 @@ func NewLocation(ad string, compartmentId string) Location {
 	return Location{availabilityDomain: ad, compartmentId: compartmentId}
 }
 
-func (loc Location) instanceIPs(connector client.Connector, instanceID string) (
+func (loc Location) instanceIPs(connector client.Connector, l boshlog.Logger, instanceID string) (
 	publicip []string, privateip []string, err error) {
 
-	vnics, err := loc.vnics(connector, instanceID)
+	vnics, err := loc.vnics(connector, l, instanceID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -33,9 +34,9 @@ func (loc Location) instanceIPs(connector client.Connector, instanceID string) (
 	return public, private, nil
 }
 
-func (loc Location) vnics(connector client.Connector, instanceID string) ([]*models.Vnic, error) {
+func (loc Location) vnics(connector client.Connector, l boshlog.Logger, instanceID string) ([]*models.Vnic, error) {
 
-	vnics, err := network.FindVnicsAttachedToInstance(connector, instanceID, loc.compartmentId)
+	vnics, err := network.FindVnicsAttachedToInstance(connector, l, instanceID, loc.compartmentId)
 	if err != nil {
 		return nil, err
 	}
