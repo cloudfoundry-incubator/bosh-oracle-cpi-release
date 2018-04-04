@@ -90,7 +90,7 @@ func (in *Instance) WaitUntilStarted(c client.Connector, l boshlog.Logger) (err 
 	retryable := boshretry.NewRetryable(getInstanceState)
 	retryStrategy := boshretry.NewUnlimitedRetryStrategy(10*time.Second, retryable, l)
 
-	l.Debug(logTag, "Waiting for instance to reach RUNNING state...")
+	l.Debug(logTag, "Waiting for instance %s to reach RUNNING state...", in.ocid)
 	if err := retryStrategy.Try(); err != nil {
 		l.Debug(logTag, "Error waiting for instance to start %v", err)
 		return err
