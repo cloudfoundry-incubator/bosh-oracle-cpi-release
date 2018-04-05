@@ -1,5 +1,5 @@
 output vcn {
-  value = "${var.director_vcn}"
+  value = "${oci_core_virtual_network.ci_vcn.display_name}"
 }
 output subnet_id {
   value = "${oci_core_subnet.director_subnet.id}"
