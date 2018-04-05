@@ -4,6 +4,9 @@ set -e
 
 deployment_dir="${PWD}/deployment"
 cpi_release_name="bosh-oracle-cpi"
+
+# State used by teardown tasks as well
+manifest_filename="director-manifest.yml"
 state_filename="director-state.json"
 
 pwd=`pwd`
@@ -53,7 +56,8 @@ pushd ${deployment_dir}
   ls -al 
 
   echo "Deploying BOSH Director..."
-  bosh create-env ${ops_files}  --vars-store ./creds.yml --state ${state_filename} --vars-file ${vars_file} bosh.yml
+  bosh int ${ops_files}  --vars-store ./creds.yml --vars-file ${vars_file} bosh.yml > ${manifest_filename}
+  bosh create-env --state ${state_filename} ${manifest_filename}
 
   trap - ERR
   finish
