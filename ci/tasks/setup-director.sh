@@ -4,16 +4,21 @@ set -e
 
 deployment_dir="${PWD}/deployment"
 cpi_release_name="bosh-oracle-cpi"
-manifest_filename="director-manifest.yml"
 state_filename="director-state.json"
+
+pwd=`pwd`
 
 echo "Setting up artifacts..."
 cp ./candidate/*.tgz ${deployment_dir}/${cpi_release_name}.tgz
 cp ./stemcell/*.tgz ${deployment_dir}/stemcell.tgz
-cp ./cpi-release-src/bosh-deployment/bosh.yml ${deployment_dir}/${manifest_filename}
-cp ./cpi-release-src/bosh-deployment/cpi.yml ${deployment_dir}
-cp ./cpi-release-src/bosh-deployment/remove-hm.yml ${deployment_dir}/
-cp ./oci-config/director-env-vars.yml ${deployment_dir}
+cp ./bosh-deployment/bosh.yml ${deployment_dir}/
+
+vars_file=${pwd}/oci-config/director-env-vars.yml
+
+ops_files=" -o ${pwd}/bosh-deployment/oracle/cpi.yml"
+ops_files+=" -o ${pwd}/bosh-deployment/oracle/replace-default-network-with-public.yml"
+ops_files+=" -o ${pwd}/bosh-deployment/oracle/use-public-ip-for-ssh.yml"
+ops_files+=" -o ${pwd}/cpi-release-src/bosh-deployment/remove-hm.yml"
 
 # Use the candidate artifacts
 local_yml="local.yml"
@@ -31,6 +36,7 @@ cat >"${deployment_dir}/${local_yml}"<<EOF
     url: file://stemcell.tgz
 EOF
 
+ops_files+=" -o ${deployment_dir}/${local_yml}"
 
 pushd ${deployment_dir}
   function finish {
@@ -47,7 +53,7 @@ pushd ${deployment_dir}
   ls -al 
 
   echo "Deploying BOSH Director..."
-  bosh create-env --ops-file ./cpi.yml --ops-file ./${local_yml} -o ./remove-hm.yml --vars-store ./creds.yml --state ${state_filename} --vars-file ./director-env-vars.yml ${manifest_filename}
+  bosh create-env ${ops_files}  --vars-store ./creds.yml --state ${state_filename} --vars-file ${vars_file} bosh.yml
 
   trap - ERR
   finish

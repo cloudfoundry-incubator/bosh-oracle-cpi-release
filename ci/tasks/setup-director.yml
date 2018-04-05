@@ -10,6 +10,7 @@ inputs:
   - name: candidate
   - name: oci-config
   - name: stemcell
+  - name: bosh-deployment
 outputs:
   - name: deployment
 run:

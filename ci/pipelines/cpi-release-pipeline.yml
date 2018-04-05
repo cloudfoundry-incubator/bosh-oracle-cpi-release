@@ -33,6 +33,7 @@ task-definitions:
       oracle_region: ((oracle-region))
       oracle_fingerprint: ((oracle-fingerprint))
       oracle_apikey: ((oracle-apikey.private_key))
+      director_public_ip: ((director-public-ip))
 
   - &oci-tests
     task: oci-tests
@@ -126,6 +127,7 @@ jobs:
         - {trigger: true,                            get: fixture-ssh-keys, resource: fixture-env, params: {file: oci-config.tgz, unpack: true}}
         - {trigger: false,                           get: dev-version-semver}
         - {trigger: false,                           get: bats}
+        - {trigger: false,                           get: bosh-deployment}
 
       - task: download-cpi
         file: cpi-release-src/ci/tasks/download-cpi.yml
@@ -211,7 +213,14 @@ resources:
       ignore_paths:
         - .final_builds/**/*.yml
         -  releases/**/*.yml
+      username: ((github-user.username))
+      password: ((github-user.password))
 
+  - name: bosh-deployment
+    type: git
+    source:
+      uri: https://github.com/dmutreja/bosh-deployment.git
+      branch: oracle
       username: ((github-user.username))
       password: ((github-user.password))
 

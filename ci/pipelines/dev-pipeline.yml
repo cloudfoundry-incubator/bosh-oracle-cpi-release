@@ -52,14 +52,6 @@ task-definitions:
     get_params:
         action: destroy
 
-  - &setup-director
-    task: setup-director
-    file: cpi-release-src/ci/tasks/setup-director.yml
-
-  - &teardown-director
-    task: teardown-director
-    file: cpi-release-src/ci/tasks/teardown-director.yml
-
 groups:
   - name: bosh-oracle-cpi-dev-release
     jobs:
