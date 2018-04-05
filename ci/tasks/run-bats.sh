@@ -34,7 +34,7 @@ export BAT_PRIVATE_KEY="${PWD}/oci-config/userkeys/id_rsa"
 env_vars="${PWD}/oci-config/director-env-vars.yml"
 creds_yml="${PWD}/deployment/creds.yml"
 
-export BOSH_ENVIRONMENT="$(bosh2 int ${env_vars} --path /internal_ip)"
+export BOSH_ENVIRONMENT="$(bosh2 int ${env_vars} --path /external_ip)"
 export BOSH_CLIENT=admin
 export BOSH_CLIENT_SECRET="$(bosh2 int ${creds_yml} --path /admin_password)"
 export BOSH_CA_CERT="$(bosh2 int ${creds_yml} --path /director_ssl/ca)"
