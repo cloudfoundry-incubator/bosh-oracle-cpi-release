@@ -25,9 +25,6 @@ export BAT_INFRASTRUCTURE=oci
 # the type of networking being used: dynamic or manual.
 export BAT_NETWORKING="manual"
 
-# the path to ssh key, used by OS specs to ssh into BOSH VMs
-export BAT_PRIVATE_KEY="${PWD}/oci-config/userkeys/id_rsa"
-
 # Run tests with --fail-fast and skip cleanup in case of failure (optional)
 # export BAT_DEBUG_MODE=
 
@@ -38,6 +35,18 @@ export BOSH_ENVIRONMENT="$(bosh2 int ${env_vars} --path /external_ip)"
 export BOSH_CLIENT=admin
 export BOSH_CLIENT_SECRET="$(bosh2 int ${creds_yml} --path /admin_password)"
 export BOSH_CA_CERT="$(bosh2 int ${creds_yml} --path /director_ssl/ca)"
+
+# the path to ssh key, used by OS specs to ssh into BOSH VMs
+export BAT_PRIVATE_KEY="$(bosh2 int ${creds_yml} --path /cpikeys/private_key)"
+
+# BOSH_GW_PRIVATE_KEY is used  by `bosh ssh` to proxy through a gateway
+# Needed when BATs VMs are only accessible
+# from the director(gateway)
+ssh_key_path=/tmp/bat_private_key
+echo "${BAT_PRIVATE_KEY}" > ${ssh_key_path}
+chmod 600 ${ssh_key_path}
+export BOSH_GW_PRIVATE_KEY=${ssh_key_path}
+
 
 echo "Using BOSH CLI version..."
 bosh2 -v
