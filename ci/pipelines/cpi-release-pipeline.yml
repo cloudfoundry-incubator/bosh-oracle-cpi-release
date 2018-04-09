@@ -122,13 +122,13 @@ jobs:
       - task: download-cpi
         file: cpi-release-src/ci/tasks/download-cpi.yml
         params:
-          oracle_tenancy:                 ((oracle-tenancy))
-          oracle_user:                    ((oracle-user))
-          oracle_region:                  ((oracle-region))
-          oracle_fingerprint:             ((oracle-fingerprint))
-          oracle_apikey:                  ((oracle-apikey.private_key))
-          oracle_namespace:               ((oracle-namespace))
-          oracle_bucket:                  ((cpi-dev-release-bucket))
+          oracle_tenancy: ((oracle-tenancy))
+          oracle_user: ((oracle-user))
+          oracle_region: ((oracle-region))
+          oracle_fingerprint: ((oracle-fingerprint))
+          oracle_apikey: ((oracle-apikey.private_key))
+          oracle_namespace: ((oracle-namespace))
+          oracle_bucket: ((cpi-dev-release-bucket))
 
       - <<: *terraform-setup
       - <<: *terraform-apply
@@ -154,13 +154,13 @@ jobs:
       - task: download-cpi
         file: cpi-release-src/ci/tasks/download-cpi.yml
         params:
-          oracle_tenancy:                 ((oracle-tenancy))
-          oracle_user:                    ((oracle-user))
-          oracle_region:                  ((oracle-region))
-          oracle_fingerprint:             ((oracle-fingerprint))
-          oracle_apikey:                  ((oracle-apikey.private_key))
-          oracle_namespace:               ((oracle-namespace))
-          oracle_bucket:                  ((cpi-dev-release-bucket))
+          oracle_tenancy: ((oracle-tenancy))
+          oracle_user: ((oracle-user))
+          oracle_region: ((oracle-region))
+          oracle_fingerprint: ((oracle-fingerprint))
+          oracle_apikey: ((oracle-apikey.private_key))
+          oracle_namespace: ((oracle-namespace))
+          oracle_bucket: ((cpi-dev-release-bucket))
 
       - task: build-final-release
         file: cpi-release-src/ci/tasks/build-final-release.yml
@@ -292,8 +292,8 @@ resources:
          endpoint: https://((oracle-namespace)).compat.objectstorage.((oracle-region)).oraclecloud.com
          use_signing_v4: true
        vars:
-         oracle_tenancy: ((oracle-tenancy))
-         oracle_user: ((oracle-user))
+         oracle_tenancy_ocid: ((oracle-tenancy))
+         oracle_user_ocid: ((oracle-user))
          oracle_region: ((oracle-region))
          oracle_fingerprint: ((oracle-fingerprint))
          director_vcn: ci_prod_vcn

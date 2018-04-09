@@ -154,8 +154,8 @@ resources:
          endpoint: https://((oracle-namespace)).compat.objectstorage.((oracle-region)).oraclecloud.com
          use_signing_v4: true
        vars:
-         oracle_tenancy: ((oracle-tenancy))
-         oracle_user: ((oracle-user))
+         oracle_tenancy_ocid: ((oracle-tenancy))
+         oracle_user_ocid: ((oracle-user))
          oracle_region: ((oracle-region))
          oracle_fingerprint: ((oracle-fingerprint))
          director_vcn: ci_develop_vcn
