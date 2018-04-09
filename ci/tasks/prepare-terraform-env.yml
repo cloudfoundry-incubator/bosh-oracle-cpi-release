@@ -3,7 +3,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: ((docker-repo-name))/cpi-release-build-env
+    repository: alpine
     tag: "latest"
 inputs:
   - name: cpi-release-src
@@ -13,16 +13,4 @@ run:
   path: cpi-release-src/ci/tasks/prepare-terraform-env.sh
 
 params:
-  oracle_tenancy:                 replace-me
-  oracle_user:                    replace-me
-  oracle_compartment_name:        replace-me
-  oracle_region:                  replace-me
-  oracle_fingerprint:             replace-me
-  oracle_apikey:                  replace-me
-  oracle_apikey_file_name:        oci_api_key.pem
-  director_subnet_cidr:           replace_me
-  director_compartment_name:      replace_me
-  director_vcn:                   replace_me
-  director_ad:                    replace_me
-  bats_subnet1_cidr:              replace_me
-  bats_subnet2_cidr:              replace_me
+  oracle_apikey:
