@@ -4,21 +4,26 @@ task-definitions:
     task: prepare-terraform-env
     file: cpi-release-src/ci/tasks/prepare-terraform-env.yml
     params:
-      oracle_tenancy: ((oracle-tenancy))
-      oracle_user: ((oracle-user))
-      oracle_region: ((oracle-region))
-      oracle_fingerprint: ((oracle-fingerprint))
       oracle_apikey: ((oracle-apikey.private_key))
-      director_vcn: ((director-vcn))
-      director_compartment_name: ((director-compartment-name))
 
   - &terraform-apply
     put: terraform-oci
     params:
       terraform_source: cpi-release-src/ci/terraform
-      env_name:  oracle-pipeline-env
+      generate_random_name: true
       var_files: [terraform-env/oci.vars]
       plugin_dir: /.terraform.d/plugins/linux_amd64
+
+  - &terraform-destroy
+    put: terraform-oci
+    params:
+      terraform_source: cpi-release-src/ci/terraform
+      env_name_file: terraform-oci/name
+      action: destroy
+      var_files: [terraform-env/oci.vars]
+      plugin_dir: /.terraform.d/plugins/linux_amd64
+    get_params:
+        action: destroy
 
   - &prepare-test-config
     task: prepare-test-config
@@ -36,17 +41,6 @@ task-definitions:
     params:
           TEST_SPEC: "Test_[^StemcellOps]"
 
-
-  - &terraform-destroy
-    put: terraform-oci
-    params:
-      terraform_source: cpi-release-src/ci/terraform
-      env_name: oracle-pipeline-env
-      action: destroy
-      var_files: [terraform-env/oci.vars]
-      plugin_dir: /.terraform.d/plugins/linux_amd64
-    get_params:
-        action: destroy
 
 groups:
   - name: bosh-oracle-cpi-dev-release
@@ -159,3 +153,11 @@ resources:
          region_name: ((oracle-region))
          endpoint: https://((oracle-namespace)).compat.objectstorage.((oracle-region)).oraclecloud.com
          use_signing_v4: true
+       vars:
+         oracle_tenancy: ((oracle-tenancy))
+         oracle_user: ((oracle-user))
+         oracle_region: ((oracle-region))
+         oracle_fingerprint: ((oracle-fingerprint))
+         director_vcn: ci_develop_vcn
+         director_compartment_name: ((director-compartment-name))
+
