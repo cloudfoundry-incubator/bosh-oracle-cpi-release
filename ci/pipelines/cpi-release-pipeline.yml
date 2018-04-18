@@ -114,21 +114,11 @@ jobs:
       - aggregate:
         - {trigger: true, passed: [build-candidate], get: cpi-release-src, resource: bosh-cpi-release-src}
         - {trigger: true, passed: [build-candidate], get: stemcell, resource: oracle-ubuntu-stemcell}
-        - {trigger: true,                            get: fixture-ssh-keys, resource: fixture-env, params: {file: oci-config.tgz, unpack: true}}
-        - {trigger: false,                           get: dev-version-semver}
-        - {trigger: false,                           get: bats}
-        - {trigger: false,                           get: bosh-deployment}
-
-      - task: download-cpi
-        file: cpi-release-src/ci/tasks/download-cpi.yml
-        params:
-          oracle_tenancy: ((oracle-tenancy))
-          oracle_user: ((oracle-user))
-          oracle_region: ((oracle-region))
-          oracle_fingerprint: ((oracle-fingerprint))
-          oracle_apikey: ((oracle-apikey.private_key))
-          oracle_namespace: ((oracle-namespace))
-          oracle_bucket: ((cpi-dev-release-bucket))
+        - {trigger: false, passed: [build-candidate], get: candidate, resource: dev-release-cpi}
+        - {trigger: false, get: fixture-ssh-keys, resource: fixture-env, params: {file: oci-config.tgz, unpack: true}}
+        - {trigger: false, get: dev-version-semver}
+        - {trigger: false, get: bats}
+        - {trigger: false, get: bosh-deployment}
 
       - <<: *terraform-setup
       - <<: *terraform-apply
@@ -150,17 +140,8 @@ jobs:
          - {trigger: false, get: final-version-semver,   params: {bump: major}}
          - {trigger: true, passed: [run-bats], get: cpi-release-src, resource: bosh-cpi-release-src}
          - {trigger: true, passed: [run-bats], get: stemcell, resource: oracle-ubuntu-stemcell}
+         - {trigger: false, passed: [run-bats], get: candidate, resource: dev-release-cpi}
 
-      - task: download-cpi
-        file: cpi-release-src/ci/tasks/download-cpi.yml
-        params:
-          oracle_tenancy: ((oracle-tenancy))
-          oracle_user: ((oracle-user))
-          oracle_region: ((oracle-region))
-          oracle_fingerprint: ((oracle-fingerprint))
-          oracle_apikey: ((oracle-apikey.private_key))
-          oracle_namespace: ((oracle-namespace))
-          oracle_bucket: ((cpi-dev-release-bucket))
 
       - task: build-final-release
         file: cpi-release-src/ci/tasks/build-final-release.yml
@@ -186,6 +167,11 @@ resource_types:
     type: docker-image
     source:
       repository: ((docker-repo-name))/oci-terraform-resource
+
+  - name: ocis3
+    type: docker-image
+    source:
+      repository: dmutreja/s3-resource
 
 resources:
   - name: bosh-cpi-release-publish
@@ -215,7 +201,7 @@ resources:
       password: ((github-user.password))
 
   - name: dev-release-cpi
-    type: s3
+    type: ocis3
     source:
        endpoint: https://((oracle-namespace)).compat.objectstorage.((oracle-region)).oraclecloud.com
        region_name: ((oracle-region))
