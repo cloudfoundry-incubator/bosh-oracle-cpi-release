@@ -287,5 +287,5 @@ resources:
   - name: bats
     type: git
     source:
-      uri: https://github.com/cloudfoundry/bosh-acceptance-tests.git
-      branch: gocli-bats
+      uri: https://github.com/dmutreja/bosh-acceptance-tests.git
+      branch: oracle-certification

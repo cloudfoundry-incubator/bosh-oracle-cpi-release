@@ -2,7 +2,7 @@ output vcn {
   value = "${oci_core_virtual_network.ci_vcn.display_name}"
 }
 
-outout vcn_id {
+output vcn_id {
   value = "${oci_core_virtual_network.ci_vcn.id}"
 }
 
