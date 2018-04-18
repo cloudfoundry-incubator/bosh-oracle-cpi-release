@@ -131,3 +131,9 @@ resource "oci_core_subnet" "bats_subnet2" {
     "${oci_core_security_list.ci_public_all.id}"]
   prohibit_public_ip_on_vnic = false
 }
+
+resource "oci_core_public_ip" "director_vip" {
+  compartment_id = "${data.null_data_source.SetupConfig.inputs.compartment_id}"
+  lifetime = "RESERVED"
+  display_name = "${oci_core_virtual_network.ci_vcn.display_name}_director_vip"
+}

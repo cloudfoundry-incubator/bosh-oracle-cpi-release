@@ -30,6 +30,6 @@ subnet: <%= properties['subnet_name'] %>
 internal_cidr: <%= properties['subnet_cidr'] %>
 internal_gw: <%= properties['subnet_gw'] %>
 internal_ip: <%= properties['subnet_first_ip'] %>
-<% if properties.has_key?('director_public_ip') %>
-external_ip: <%= properties['director_public_ip'] -%>
+<% if properties.has_key?('external_ip') %>
+external_ip: <%= properties['external_ip'] -%>
 <% end -%>

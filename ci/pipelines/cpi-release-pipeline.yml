@@ -34,7 +34,6 @@ task-definitions:
       oracle_region: ((oracle-region))
       oracle_fingerprint: ((oracle-fingerprint))
       oracle_apikey: ((oracle-apikey.private_key))
-      director_public_ip: ((director-public-ip))
 
   - &oci-tests
     task: oci-tests

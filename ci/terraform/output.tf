@@ -73,7 +73,7 @@ output bats_subnet2_static_ip {
 }
 
 output external_ip {
-  value = "129.146.18.147"
+  value = "${oci_core_public_ip.director_vip.ip_address}"
 }
 
 output tenancy {
@@ -101,4 +101,3 @@ output apikey {
   sensitive = true
   value = "${file(var.oracle_private_key_path)}"
 }
-
