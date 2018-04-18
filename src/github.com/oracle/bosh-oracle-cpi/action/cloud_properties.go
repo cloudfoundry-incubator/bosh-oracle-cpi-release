@@ -8,10 +8,14 @@ type DiskCloudProperties struct {
 type Environment map[string]interface{}
 
 // NetworkCloudProperties holds the CPI specific network properties
-// defined in cloud config
+// defined in cloud config. Either the VCN name or VCN id must be set in the
+// configuration. Similarly, either the subnet name or id must be set in the
+// configuration.
 type NetworkCloudProperties struct {
 	VcnName    string `json:"vcn,omitempty"`
+	VcnID      string `json:"vcn_id,omitempty"`
 	SubnetName string `json:"subnet_name,omitempty"`
+	SubnetID   string `json:"subnet_id,omitempty"`
 }
 
 // StemcellCloudProperties holds the CPI specific stemcell properties

@@ -6,7 +6,7 @@
 %>
 <%
   ['oracle_user', 'oracle_tenancy', 'oracle_fingerprint', 'oracle_apikey_path', 'oracle_region',
-   'compartment_id', 'ad', 'vcn', 'subnet_name'].each do |val|
+   'compartment_id', 'ad', 'vcn', 'vcn_id', 'subnet_name', 'subnet_id'].each do |val|
     if properties[val].nil? || properties[val].empty?
       raise "Missing variable: #{val}"
     end
@@ -22,7 +22,9 @@ region=<%= properties['oracle_region'] %>
 compartment=<%= properties['compartment_id'] %>
 ad=<%= properties['ad'] %>
 vcn=<%= properties['vcn'] %>
+vcn_id=<%= properties['vcn_id'] %>
 subnet=<%= properties['subnet_name'] %>
+subnet_id=<%= properties['subnet_id'] %>
 subnet2=<%= properties['subnet2_name'] || properties['subnet_name'] %>
 cpiPrivateKeyPath=<%= properties['cpiPrivateKeyPath'] || './cpikeys/id_rsa' %>
 cpiPublicKeyPath=<%= properties['cpiPublicKeyPath'] || './cpikeys/id_rsa.pub' %>

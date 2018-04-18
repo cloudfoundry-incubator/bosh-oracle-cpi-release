@@ -156,8 +156,8 @@ func Test_VmOpsAttachMultipleVnics(t *testing.T) {
 	icfg := state.DefaultInstanceConfiguration()
 	icfg.Network = append(icfg.Network,
 		vm.NetworkConfiguration{VcnName: state.VCN(),
-			SubnetName: state.Subnet2(),
-			Type:       "manual"})
+			SubnetName:                  state.Subnet2(),
+			Type:                        "manual"})
 	in, err = creator.CreateInstance(icfg, vm.InstanceMetadata{})
 
 	if err != nil {
@@ -216,4 +216,45 @@ func updateInstance(t *testing.T, f *VMFixture, wg *sync.WaitGroup) {
 	err := updater.UpdateInstanceName(instance.ID(), "test-vm-renamed")
 	assertIsNil(t, err, fmt.Sprintf("Unexpected failure when updating instance %s.  Error = [%v]",
 		instance.ID(), err))
+}
+
+func Test_VmOpsSupportsVcnAndSubnetNames(t *testing.T) {
+	state := NewConnectionFixture()
+	state.Setup(t)
+	defer state.TearDown(t)
+
+	var in *resource.Instance
+	var err error
+	creator := vm.NewCreator(state.Connector(),
+		state.Logger(), state.AD())
+	terminator := vm.NewTerminator(state.Connector(), state.Logger())
+
+	deleteInstance := func() {
+		if err == nil && in != nil {
+			terminator.TerminateInstance(in.ID())
+		}
+	}
+	defer deleteInstance()
+
+	icfg := state.InstanceConfigurationWithNetworkNames()
+	icfg.Name = "test-instance-in-named-network"
+
+	in, err = creator.CreateInstance(icfg,
+		vm.InstanceMetadata{
+			vm.NewSSHKeys(state.connector.AuthorizedKeys()),
+			vm.NewUserData(icfg.Name,
+				"http://127.0.0.1:6901",
+				manualNetworkNoIp.DNS,
+				registry.NetworksSettings{
+					"test-network": manualNetworkNoIp,
+				}),
+		})
+
+	if err != nil {
+		t.Fatalf("Error creating instance %v", err)
+	}
+	if in == nil {
+		t.Fatalf("Unexpected nil instance")
+	}
+
 }

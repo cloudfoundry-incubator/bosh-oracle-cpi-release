@@ -4,14 +4,6 @@
      properties = properties.merge(contents)
    end
 -%>
-<%
-  ['oracle_user', 'oracle_tenancy', 'oracle_fingerprint', 'oracle_apikey', 'oracle_region',
-   'compartment_id', 'ad', 'vcn', 'subnet_name', 'subnet_cidr', 'subnet_gw','subnet_first_ip'].each do |val|
-    if properties[val].nil? || properties[val].empty?
-      raise "Missing environment variable: #{val}"
-    end
-  end
--%>
 ---
 cpi: oci
 properties:
@@ -24,20 +16,20 @@ properties:
   networks:
   - name: default
     type: manual
-    static_ip: <%= properties['bats_subnet1_static_ip'] %> # Primary (private) IP assigned to the bat-release job vm (primary NIC), must be in the primary static range
+    static_ip: <%= properties['bats_subnet1_static_ip'] %>
     cloud_properties:
-      vcn: <%= properties['vcn'] %>
-      subnet: <%= properties['bats_subnet1_name'] %>
+      vcn_id: <%= properties['vcn_id'] %>
+      subnet_id: <%= properties['bats_subnet1_id'] %>
     cidr: <%= properties['bats_subnet1_cidr'] %>
     reserved: ['<%= properties['bats_subnet1_reserved'] %>']
     static: ['<%= properties['bats_subnet1_static'] %>']
     gateway: <%= properties['bats_subnet1_gw'] %>
   - name: second # Secondary network for testing jobs with multiple manual networks
     type: manual
-    static_ip: <%= properties['bats_subnet2_static_ip'] %> # Primary (private) IP assigned to the bat-release job vm (primary NIC), must be in the primary static range
+    static_ip: <%= properties['bats_subnet2_static_ip'] %>
     cloud_properties:
-      vcn: <%= properties['vcn'] %>
-      subnet: <%= properties['bats_subnet2_name'] %>
+      vcn_id: <%= properties['vcn_id'] %>
+      subnet_id: <%= properties['bats_subnet2_id'] %>
     cidr: <%= properties['bats_subnet2_cidr'] %>
     reserved: ['<%= properties['bats_subnet2_reserved'] %>']
     static: ['<%= properties['bats_subnet2_static'] %>']

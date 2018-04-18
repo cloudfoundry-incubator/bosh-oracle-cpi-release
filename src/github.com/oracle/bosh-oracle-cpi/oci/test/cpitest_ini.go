@@ -19,8 +19,11 @@ type CpiTestIni struct {
 	Region                 string `ini:"region" mapstructure:"Region"`
 	AvailabilityDomain     string `ini:"ad" mapstructure:"AvailabilityDomain"`
 	VcnName                string `ini:"vcn" mapstructure:"VcnName"`
+	VcnID                  string `ini:"vcn_id" mapstructure:"VcnID"`
 	SubnetName             string `ini:"subnet" mapstructure:"SubnetName"`
+	SubnetID               string `ini:"subnet_id" mapstructure:"SubnetID"`
 	Subnet2Name            string `ini:"subnet2" mapstructure:"Subnet2Name"`
+	Subnet2ID              string `ini:"subnet2_id" mapstructure:"Subnet2ID"`
 	CpiPrivateKeyPath      string `ini:"cpiPrivateKeyPath" mapstructure:"CpiPrivateKeyPath"`
 	CpiPublicKeyPath       string `ini:"cpiPublicKeyPath" mapstructure:"CpiPublicKeyPath"`
 	UserPublicKeyPath      string `ini:"userPublicKeyPath" mapstructure:"UserPublicKeyPath"`

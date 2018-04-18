@@ -56,9 +56,17 @@ func (c *ConnectionFixture) Logger() boshlog.Logger {
 func (c *ConnectionFixture) VCN() string {
 	return c.cpiTestIni.VcnName
 }
+func (c *ConnectionFixture) VCNID() string {
+	return c.cpiTestIni.VcnID
+}
 func (c *ConnectionFixture) Subnet() string {
 	return c.cpiTestIni.SubnetName
 }
+
+func (c *ConnectionFixture) SubnetID() string {
+	return c.cpiTestIni.SubnetID
+}
+
 func (c *ConnectionFixture) Subnet2() string {
 	return c.cpiTestIni.Subnet2Name
 }
@@ -76,6 +84,15 @@ func (c *ConnectionFixture) StemcellImageSourceURI() string {
 }
 
 func (c *ConnectionFixture) DefaultInstanceConfiguration() vm.InstanceConfiguration {
+	icfg := vmStandard12config
+	icfg.ImageId = c.StemcellImageID()
+	icfg.Network = []vm.NetworkConfiguration{
+		{VcnID: c.VCNID(), SubnetID: c.SubnetID(), IP: "", Type: "manual"},
+	}
+	return icfg
+}
+
+func (c *ConnectionFixture) InstanceConfigurationWithNetworkNames() vm.InstanceConfiguration {
 	icfg := vmStandard12config
 	icfg.ImageId = c.StemcellImageID()
 	icfg.Network = []vm.NetworkConfiguration{

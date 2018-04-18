@@ -40,7 +40,9 @@ func (ns Networks) AsNetworkConfiguration() vm.Networks {
 	for _, n := range ns {
 		networks = append(networks, vm.NetworkConfiguration{
 			VcnName:    n.CloudProperties.VcnName,
+			VcnID:      n.CloudProperties.VcnID,
 			SubnetName: n.CloudProperties.SubnetName,
+			SubnetID:   n.CloudProperties.SubnetID,
 			IP:         n.IP,
 			Type:       n.Type})
 	}
@@ -127,11 +129,11 @@ func (ns Networks) First() *Network {
 }
 
 func (n *Network) validate() error {
-	if n.CloudProperties.SubnetName == "" {
-		return bosherr.Error("Missing subnet name from network definition ")
+	if n.CloudProperties.SubnetName == "" && n.CloudProperties.SubnetID == "" {
+		return bosherr.Error("Missing subnet name or id from network definition ")
 	}
-	if n.CloudProperties.VcnName == "" {
-		return bosherr.Error("Missing vcn name from network definition ")
+	if n.CloudProperties.VcnName == "" && n.CloudProperties.VcnID == "" {
+		return bosherr.Error("Missing vcn name or id from network definition ")
 	}
 	return nil
 }

@@ -1,9 +1,13 @@
 output vcn {
   value = "${oci_core_virtual_network.ci_vcn.display_name}"
 }
+
+outout vcn_id {
+  value = "${oci_core_virtual_network.ci_vcn.id}"
+}
+
 output subnet_id {
   value = "${oci_core_subnet.director_subnet.id}"
-
 }
 output compartment_id {
   value = "${oci_core_subnet.director_subnet.compartment_id}"
@@ -26,6 +30,9 @@ output subnet_first_ip {
 
 output bats_subnet1_name {
   value = "${oci_core_subnet.bats_subnet1.display_name}"
+}
+output bats_subnet1_id {
+  value = "${oci_core_subnet.bats_subnet1.id}"
 }
 
 output bats_subnet1_cidr {
@@ -50,6 +57,9 @@ output bats_subnet1_static_ip {
 
 output bats_subnet2_name {
   value = "${oci_core_subnet.bats_subnet2.display_name}"
+}
+output bats_subnet2_id {
+  value = "${oci_core_subnet.bats_subnet2.id}"
 }
 
 output bats_subnet2_cidr {

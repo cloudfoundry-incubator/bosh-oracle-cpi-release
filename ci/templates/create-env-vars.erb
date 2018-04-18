@@ -6,7 +6,7 @@
 -%>
 <%
   ['oracle_user', 'oracle_tenancy', 'oracle_fingerprint', 'oracle_apikey', 'oracle_region',
-   'compartment_id', 'ad', 'vcn', 'subnet_name', 'subnet_cidr', 'subnet_gw','subnet_first_ip'].each do |val|
+   'compartment_id', 'ad', 'vcn', 'vcn_id', 'subnet_name', 'subnet_id', 'subnet_cidr', 'subnet_gw','subnet_first_ip'].each do |val|
     if properties[val].nil? || properties[val].empty?
       raise "Missing environment variable: #{val}"
     end
@@ -26,7 +26,9 @@ ssh_key: <%= File.read(properties['userPublicKeyPath']) %>
 region: <%= properties['oracle_region'] %>
 ad: <%= properties['ad'] %>
 vcn: <%= properties['vcn'] %>
+vcn_id: <%= properties['vcn_id'] %>
 subnet: <%= properties['subnet_name'] %>
+subnet_id: <%= properties['subnet_id'] %>
 internal_cidr: <%= properties['subnet_cidr'] %>
 internal_gw: <%= properties['subnet_gw'] %>
 internal_ip: <%= properties['subnet_first_ip'] %>

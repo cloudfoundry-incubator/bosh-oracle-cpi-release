@@ -15,14 +15,16 @@ const (
 
 type NetworkConfiguration struct {
 	VcnName    string
+	VcnID      string
 	SubnetName string
+	SubnetID   string
 	IP         string
 	Type       string
 }
 
 func (n NetworkConfiguration) newVnicConfigurator(connector client.Connector, logger boshlog.Logger) (VnicConfigurator, error) {
 
-	vcnID, subnetID, err := n.networkIDs(connector)
+	vcnID, subnetID, err := (&n).networkIDs(connector)
 	if err != nil {
 		return nil, err
 	}
@@ -36,30 +38,46 @@ func (n NetworkConfiguration) newVnicConfigurator(connector client.Connector, lo
 	return nil, fmt.Errorf("Unsupported network type %s", n.Type)
 }
 
-func (n NetworkConfiguration) subnetID(connector client.Connector, vcnId string) (string, error) {
+func (n *NetworkConfiguration) subnetID(connector client.Connector, vcnID string) (string, error) {
 
+	if n.SubnetID != "" {
+		return n.SubnetID, nil
+	}
 	_, err := n.vcnID(connector)
 	if err != nil {
 		return "", err
 	}
 
 	p := virtual_network.NewListSubnetsParams()
-	p.WithCompartmentID(connector.CompartmentId()).WithVcnID(vcnId)
+	p.WithCompartmentID(connector.CompartmentId()).WithVcnID(vcnID)
 	response, err := connector.CoreSevice().VirtualNetwork.ListSubnets(p)
 	if err != nil {
 		return "", err
 	}
+	matches := 0
+	var id string
 	for _, s := range response.Payload {
 		if s.DisplayName == n.SubnetName {
-			return *s.ID, nil
+			matches += 1
+			if matches > 1 {
+				return "", fmt.Errorf("More than 1 subnet named '%s' found in vcn '%s'", n.VcnName, vcnID)
+			}
+			id = *s.ID
 		}
 	}
-	return "", fmt.Errorf("Unable to find ID of subnet %s", n.SubnetName)
+	if matches == 1 {
+		n.SubnetID = id
+		return id, nil
+	}
+	return "", fmt.Errorf("Unable to find OCID of subnet '%s' in vcn '%s'", n.SubnetName, vcnID)
 }
 
 // VcnID queries the OCID of a vcn from the compute service
-func (n NetworkConfiguration) vcnID(connector client.Connector) (string, error) {
+func (n *NetworkConfiguration) vcnID(connector client.Connector) (string, error) {
 
+	if n.VcnID != "" {
+		return n.VcnID, nil
+	}
 	req := virtual_network.NewListVcnsParams()
 	req.WithCompartmentID(connector.CompartmentId())
 	res, err := connector.CoreSevice().VirtualNetwork.ListVcns(req)
@@ -67,15 +85,25 @@ func (n NetworkConfiguration) vcnID(connector client.Connector) (string, error) 
 		return "", err
 	}
 
+	matches := 0
+	var id string
 	for _, v := range res.Payload {
 		if v.DisplayName == n.VcnName {
-			return *v.ID, nil
+			matches += 1
+			if matches > 1 {
+				return "", fmt.Errorf("More than 1 vcn with named '%s' found in compartment '%s'", n.VcnName, connector.CompartmentId())
+			}
+			id = *v.ID
 		}
 	}
-	return "", fmt.Errorf("Error finding VcnID of VCN %s", n.VcnName)
+	if matches == 1 {
+		n.VcnID = id
+		return id, nil
+	}
+	return "", fmt.Errorf("Unable to finding OCID of VCN '%s' in compartment '%s'", n.VcnName, connector.CompartmentId())
 }
 
-func (n NetworkConfiguration) networkIDs(connector client.Connector) (string, string, error) {
+func (n *NetworkConfiguration) networkIDs(connector client.Connector) (string, string, error) {
 
 	vcnID, err := n.vcnID(connector)
 
@@ -90,11 +118,11 @@ func (n NetworkConfiguration) networkIDs(connector client.Connector) (string, st
 
 func (n NetworkConfiguration) validate() error {
 
-	if n.VcnName == "" {
-		return fmt.Errorf(" Missing VCN name")
+	if n.VcnName == "" && n.VcnID == "" {
+		return fmt.Errorf("Must specify either vcn name or vcn id")
 	}
-	if n.SubnetName == "" {
-		return fmt.Errorf("Missing subnet name")
+	if n.SubnetName == "" && n.SubnetID == "" {
+		return fmt.Errorf("Must specify either subnet name or subnet id")
 	}
 	return nil
 }
