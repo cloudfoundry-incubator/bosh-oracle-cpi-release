@@ -1,5 +1,9 @@
 #!/bin/bash
 
+: ${DOCKER_USER:?}
+: ${DOCKER_PWD:?}
+: ${DOCKER_IMAGE:?}
+
 set -e
 
 DOCKER_IMAGE=${DOCKER_IMAGE:-dmutreja/oci-terraform-resource}
@@ -11,7 +15,7 @@ docker login -u $DOCKER_USER -p $DOCKER_PWD
 if [ ! -d oci-provider ]; then
  echo "Downloading oci-provider..."
  mkdir oci-provider
- curl -sSL https://github.com/oracle/terraform-provider-oci/releases/download/v2.0.4/linux.tar.gz | tar -xzC oci-provider
+ curl -sSL https://github.com/oracle/terraform-provider-oci/releases/download/v2.1.5/linux_amd64.tar.gz | tar -xzC oci-provider
 fi
 
 if [ ! -d null-provider ]; then 
