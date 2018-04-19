@@ -23,3 +23,6 @@ terraform.tfstate.backup
 #*
 pkg/*
 bin/*
+.final_builds/**/*.yml
+releases/**/*.yml
+
