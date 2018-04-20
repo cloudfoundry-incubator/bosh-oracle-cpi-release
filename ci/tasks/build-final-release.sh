@@ -59,7 +59,7 @@ EOF
   git add .
   git config --global user.email bosh-build@oracle.com
   git config --global user.name CI
-  git commit -m "BOSH Oracle CPI BOSH Release v${semver}"
+  git commit --allow-empty -m "BOSH Oracle CPI BOSH Release v${semver}"
 
 popd
 
