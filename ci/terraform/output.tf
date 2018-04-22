@@ -19,12 +19,20 @@ output subnet_name {
 output subnet_cidr {
   value = "${oci_core_subnet.director_subnet.cidr_block}"
 }
-
 output subnet_gw {
   value = "${cidrhost(oci_core_subnet.director_subnet.cidr_block, 1)}"
 }
-
 output subnet_first_ip {
+  value = "${cidrhost(oci_core_subnet.director_subnet.cidr_block, 2)}"
+}
+
+output internal_cidr {
+  value = "${oci_core_subnet.director_subnet.cidr_block}"
+}
+output internal_gw {
+  value = "${cidrhost(oci_core_subnet.director_subnet.cidr_block, 1)}"
+}
+output internal_ip {
   value = "${cidrhost(oci_core_subnet.director_subnet.cidr_block, 2)}"
 }
 
