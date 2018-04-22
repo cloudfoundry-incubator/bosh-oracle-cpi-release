@@ -3,14 +3,14 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: ((docker-repo-name))/ubuntu-xenial-boshcliv2
+    repository: ((docker-repo-name))/ubuntu-boshcliv2
     tag: "latest"
 inputs:
   - name: cpi-release-src
   - name: candidate
-  - name: oci-config
   - name: stemcell
   - name: bosh-deployment
+  - name: terraform-oci
 outputs:
   - name: deployment
 run:
