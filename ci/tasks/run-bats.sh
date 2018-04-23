@@ -28,7 +28,7 @@ export BAT_NETWORKING="manual"
 # Run tests with --fail-fast and skip cleanup in case of failure (optional)
 # export BAT_DEBUG_MODE=
 
-env_vars="${PWD}/oci-config/director-env-vars.yml"
+env_vars="${PWD}/deployment/director-env-vars.yml"
 creds_yml="${PWD}/deployment/creds.yml"
 
 export BOSH_ENVIRONMENT="$(bosh2 int ${env_vars} --path /external_ip)"
