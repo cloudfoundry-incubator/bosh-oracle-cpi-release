@@ -26,7 +26,6 @@ To use these instructions you need to setup the following on Oracle's Public Clo
   * `oracle-fixture-env-bucket-name`: Name of the storage bucket to store terraform state and ssh keys required for running tests
   * `stemcell-bucket`: Name of the storage bucket that contains stemcells
 - Create an [Amazon S3 Compatibility API key](https://docs.us-phoenix-1.oraclecloud.com/Content/Identity/Tasks/managingcredentials.htm#To4)
-- A user with read access to the GitHub repositories (or a fork) [https://github.com/oracle/bosh-oracle-cpi-release] and [https://github.com/oracle/bosh-oracle-cpi]
 
 ## Pipeline Setup
  
@@ -73,10 +72,5 @@ Create a YAML file containing the values specific to the OCI environment in whic
 * `stemcell-bucket`: Name of the storage bucket that contains stemcells
 
 ##### BOSH/BATs deployment parameters
-* `director-ad`: Name of the [availability domain](https://docs.us-phoenix-1.oraclecloud.com/Content/General/Concepts/regions.htm) in which to install BOSH Director
-* `director-compartment-name`: Name of the OCI compartment to use 
-* `director-vcn`: Name of an existing VCN within the above compartment
-* `director-subnet-cidr`: CIDR of the subnet to create for use by the BOSH director
-* `bats-subnet1-cidr`: CIDR of BATs subnet1
-* `bats-subnet2-cidr`: CIDR of BATs subnet2
+* `director-compartment-name`: Name of the OCI compartment in which the pipeline will create the required resources (VCN, subnet, instances, disks etc) for running tests. 
 
